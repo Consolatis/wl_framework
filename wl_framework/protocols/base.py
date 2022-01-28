@@ -17,6 +17,12 @@ class ArgString:
 		data = struct.pack('=I', size) + data + (b'\x00' * (4 - (len(data) % 4)))
 		return data
 
+class ArgInt32:
+	def parse(data):
+		return 4, struct.unpack('=i', data[:4])[0]
+	def create(val):
+		return struct.pack('=i', val)
+
 class ArgUint32:
 	def parse(data):
 		return 4, struct.unpack('=I', data[:4])[0]
