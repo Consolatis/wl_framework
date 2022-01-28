@@ -5,7 +5,7 @@ Following event loops are supported:
 - asyncio
 - GLib / Gtk
 
-Adding more event loop integrations (like for Qt) should be trivial.
+Adding more event loop integrations (like for Qt or kqueue) should be trivial.
 See [DummyIntegration](wl_framework/loop_integrations/dummy.py). PRs welcome.
 
 ### Dependencies
@@ -33,7 +33,7 @@ $ ./run_example examples/wl_monitor.py
 
 ### AsyncIO
 The whole framework is synchronous, so no `async def` nor `await` are to be seen.  
-However, care is taken to not block the eventloop for unreasonable time which is accomplished internally by using callbacks. Sometimes those callbacks are provided by the framework user, for example when the user requests the content of the current clipboard selection. They can thus be wrapped into a Future which gets its result set on the synchronous callback.
+However, care is taken to not block the eventloop for unreasonable time which is accomplished internally by using callbacks. Sometimes those callbacks are provided by the framework user, for example when requesting the content of the current clipboard selection. They can thus be wrapped into a Future which gets its result set on the synchronous callback.
 
 The wayland connection itself is kept in a blocking state but only read from in a `readable` notification by the event loop. Writing however is being done without waiting for a `writeable` notification which should be fine on a local Unix socket connection. This may change in the future if deemed necessary. Open an issue if you can think of negative side effects of the current design.
 
