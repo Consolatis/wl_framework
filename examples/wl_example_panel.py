@@ -249,6 +249,10 @@ class PanelWindow(Gtk.Window):
 if __name__ == '__main__':
 
 	import sys
+	screen_anchor = {
+		'top': GtkLayerShell.Edge.TOP,
+		'bottom': GtkLayerShell.Edge.BOTTOM,
+	}.get(sys.argv[1] if len(sys.argv) == 2 else 'bottom')
 
 	try:
 		context = Context()
@@ -262,7 +266,7 @@ if __name__ == '__main__':
 	GtkLayerShell.auto_exclusive_zone_enable(panel)
 	GtkLayerShell.set_anchor(panel, GtkLayerShell.Edge.LEFT, True)
 	GtkLayerShell.set_anchor(panel, GtkLayerShell.Edge.RIGHT, True)
-	GtkLayerShell.set_anchor(panel, GtkLayerShell.Edge.BOTTOM, True)
+	GtkLayerShell.set_anchor(panel, screen_anchor, True)
 	GtkLayerShell.set_layer(panel, GtkLayerShell.Layer.BOTTOM)
 	panel.show_all()
 
