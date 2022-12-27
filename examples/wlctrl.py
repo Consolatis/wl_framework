@@ -7,6 +7,11 @@ from wl_framework.network.connection import (
 from wl_framework.protocols.foreign_toplevel import ForeignTopLevel
 
 class WlCtrl(WaylandConnection):
+	EXIT_OK,        \
+	EXIT_ARG_ERROR, \
+	EXIT_NO_MATCH,  \
+	EXIT_MULTIPLE_MATCHES = range(4)
+
 	def __init__(self, sys_args, *args, **kwargs):
 		if not sys_args:
 			self.action = 'list'
@@ -32,6 +37,7 @@ class WlCtrl(WaylandConnection):
 			):
 				raise RuntimeError(usage)
 		super().__init__(*args, **kwargs)
+		self.return_code = WlCtrl.EXIT_OK
 
 	def quit(self, data=None):
 		self.shutdown()
@@ -70,11 +76,13 @@ class WlCtrl(WaylandConnection):
 				windows_found.append(window)
 		if not windows_found:
 			print(f"No window matches target {self.target}")
+			self.return_code = WlCtrl.EXIT_NO_MATCH
 			self.quit()
 			return
 		if len(windows_found) > 1:
 			print(f"Found multiple windows. Not doing anything.")
 			self._print_list(windows_found)
+			self.return_code = WlCtrl.EXIT_MULTIPLE_MATCHES
 			self.quit()
 			return
 		func_name, func_args = self.action
@@ -122,7 +130,7 @@ f"""
 		@app_id   match app_id
 		=title    match title
 		:title    match part of title
-		Warning: #window-handle might be reused or differ completely on the next call!
+		Warning: #handle might be reused or differ completely on the next call!
 
 	<action> should be one of:
 		activate | focus
@@ -144,9 +152,9 @@ f"""
 		app = WlCtrl(sys.argv[1:], eventloop_integration=loop)
 	except RuntimeError as e:
 		print(e)
-		sys.exit(1)
+		sys.exit(WlCtrl.EXIT_ARG_ERROR)
 
 	try:
 		loop.run()
 	except WaylandDisconnected:
-		pass
+		sys.exit(app.return_code)
