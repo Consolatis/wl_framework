@@ -3,8 +3,15 @@
 from functools import partial
 
 from wl_framework.network.connection import WaylandConnection
+from wl_framework.protocols.base import UnsupportedProtocolError
 from wl_framework.protocols.foreign_toplevel import ForeignTopLevel
 from wl_framework.protocols.data_control import DataControl
+
+from wl_framework.protocols.idle_notify import (
+	IdleNotifyManager,
+	IdleNotifier as _IdleNotifier
+)
+
 
 class ForeignTopLevelMonitor(ForeignTopLevel):
 
@@ -60,12 +67,31 @@ class ClipboardMonitor(DataControl):
 		self.log(f"Received {' primary' if is_primary else 'main'} selection: '{data}'")
 
 
+class IdleNotifier(_IdleNotifier):
+	def on_idle(self):
+		idle_time = self._idle_time_in_ms / 1000
+		self.log(f"No user activity for more than {idle_time:.0f} seconds")
+		#if self.supports_simulate:
+		#	self.log(f"Faking user activity for {idle_time:.0f} seconds")
+		#	self.simulate_user_activity()
+
+	def on_resume(self):
+		self.log("User activity resumed")
+
+
 class WlMonitor(WaylandConnection):
 
 	def on_initial_sync(self, data):
 		super().on_initial_sync(data)
 		self.toplevels = ForeignTopLevelMonitor(self)
 		self.clipboard = ClipboardMonitor(self)
+		try:
+			self.idle = IdleNotifyManager(self, IdleNotifier)
+			self._idle_notifier = self.idle.get_idle_notifier(10,
+				self.display.seat
+			)
+		except UnsupportedProtocolError as e:
+			self.log(e)
 
 
 if __name__ == '__main__':
