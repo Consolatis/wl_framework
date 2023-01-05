@@ -102,10 +102,11 @@ class WlCtrl(WaylandConnection):
 			obj_id = ' Handle'
 			app_id = ' AppID'
 			title = ' Title'
+			states = ''
 		handle_max = max(len(d.obj_id), max(len(str(x.obj_id)) for x in windows))
 		app_id_max = max(len(d.app_id), max(len(x.app_id) for x in windows))
 		title_max = max(len(d.title), max(len(x.title) for x in windows))
-		fmt = "  {0.obj_id:{1}}    {0.app_id:{2}}    {0.title:{3}}"
+		fmt = "  {0.obj_id:{1}}    {0.app_id:{2}}    {0.title:{3}} {0.states}"
 		print()
 		print(fmt.format(d, handle_max, app_id_max, title_max))
 		print("  {:-<{}}    {:-^{}}    {:->{}}".format('', handle_max, '', app_id_max, '', title_max))
