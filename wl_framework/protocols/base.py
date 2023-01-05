@@ -35,6 +35,9 @@ class ArgArray:
 		data = data[4:4 + size]
 		return 4 + size, data
 
+class UnsupportedProtocolError(Exception):
+	pass
+
 class Interface:
 	def __init__(self, connection, obj_id=None):
 		self.version = 1

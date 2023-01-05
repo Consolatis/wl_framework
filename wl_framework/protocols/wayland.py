@@ -5,7 +5,8 @@ import struct
 from .base import (
 	ArgUint32,
 	ArgString,
-	Interface
+	Interface,
+	UnsupportedProtocolError
 )
 
 class ArgDisplayError:
@@ -99,7 +100,7 @@ class Registry(Interface):
 		if not self._initial_sync:
 			raise RuntimeError("Bind without waiting for full sync. Please bind in on_initial_sync().")
 		if interface.name not in self._registry:
-			raise RuntimeError(f"Interface {interface.name} not supported by server")
+			raise UnsupportedProtocolError(f"Interface {interface.name} not supported by server")
 		global_id, version = self._registry[interface.name]
 		version = min(interface.version, version)
 		if version < interface.version:
