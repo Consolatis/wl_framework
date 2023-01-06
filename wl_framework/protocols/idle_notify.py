@@ -11,7 +11,6 @@ def IdleNotifyManager(*args, **kwargs):
 	for protocol_name in ('ext_idle_notifier_v1', 'org_kde_kwin_idle'):
 		try:
 			return _IdleNotifyManager(protocol_name, *args, **kwargs)
-			break
 		except UnsupportedProtocolError as e:
 			pass
 	else:
