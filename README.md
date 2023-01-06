@@ -25,6 +25,8 @@ $ ./run_example examples/wl_monitor.py
 ### Supported protocols
 - [wlr-foreign-toplevel-management-unstable-v1](https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-foreign-toplevel-management-unstable-v1.xml) (misses output_enter / output_leave)
 - [wlr-data-control-unstable-v1.xml](https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-data-control-unstable-v1.xml) (misses setting own selections)
+- [ext-idle-notify-v1.xml](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/ext-idle-notify/ext-idle-notify-v1.xml)
+- [idle.xml (KDE)](https://github.com/KDE/plasma-wayland-protocols/blob/master/src/protocols/idle.xml)
 
 ### Examples
 - [wl_monitor](examples/wl_monitor.py) Console monitor for window and clipboard changes. Good starting point for an overview of the API + shows how to use it with asyncio.

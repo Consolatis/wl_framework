@@ -1,6 +1,5 @@
 # ext: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/ext-idle-notify/ext-idle-notify-v1.xml
-# kde: https://github.com/swaywm/swayidle/blob/4b9e70c371561a1b31bc8ff645b8e0602d6e506c/idle.xml
-# TODO: Use a more authoritative link for the org_kde_kwin_idle protocol
+# kde: https://github.com/KDE/plasma-wayland-protocols/blob/master/src/protocols/idle.xml
 
 from .base import (
 	ArgUint32,
