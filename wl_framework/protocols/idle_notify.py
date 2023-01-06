@@ -13,11 +13,12 @@ def IdleNotifyManager(*args, **kwargs):
 			return _IdleNotifyManager(protocol_name, *args, **kwargs)
 		except UnsupportedProtocolError as e:
 			pass
-	else:
-		raise UnsupportedProtocolError(
-			"Neither org_kde_kwin_idle nor " +
-			"ext_idle_notifier_v1 supported by compositor"
-		)
+
+	raise UnsupportedProtocolError(
+		"Neither org_kde_kwin_idle nor " +
+		"ext_idle_notifier_v1 supported by compositor"
+	)
+
 
 class _IdleNotifyManager(Interface):
 	def __init__(self, interface_name, connection, notifier_class):
