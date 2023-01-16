@@ -42,7 +42,7 @@ class KeyMap:
 		if not symbol:
 			symbol = self._get_symbol(name)
 
-		#print(f"'{name}' -> {symbol} {f'(U+{symbol:02x})' if isinstance(symbol, int) else ''}")
+		#self.log(f"'{name}' -> {symbol} {f'(U+{symbol:02x})' if isinstance(symbol, int) else ''}")
 		return symbol
 
 	def _get_symbol_xkb(self, name):
@@ -142,7 +142,7 @@ class KeyMap:
 					self.changed = True
 				res.append(key_sym[0])
 			except Exception as e:
-				print(e)
+				self.log(e)
 		return res
 
 	def _generate(self):

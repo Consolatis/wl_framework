@@ -27,14 +27,13 @@ $ ./run_example examples/wl_monitor.py
 - [wlr-data-control-unstable-v1.xml](https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-data-control-unstable-v1.xml) (misses setting own selections)
 - [ext-idle-notify-v1.xml](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/ext-idle-notify/ext-idle-notify-v1.xml)
 - [idle.xml (KDE)](https://github.com/KDE/plasma-wayland-protocols/blob/master/src/protocols/idle.xml)
-- [virtual-keyboard-unstable-v1.xml](https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/protocol/virtual-keyboard-unstable-v1.xml)
-
+- [virtual-keyboard-unstable-v1.xml](https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/protocol/virtual-keyboard-unstable-v1.xml) (optional dependency to libxkbcommon)
 
 ### Examples
 - [wl_monitor](examples/wl_monitor.py) Console monitor for window and clipboard changes. Good starting point for an overview of the API + shows how to use it with asyncio.
 - [wlctrl](examples/wlctrl.py) Very basic console control of windows.
 - [wl_example_panel](examples/wl_example_panel.py) Very basic but fully functional tasklist panel in 225 SLOC. Requires python-gi + GTK3 and GtkLayerShell typelibs.
-- [wl_virtual_keyboard](examples/wl_virtual_keyboard.py) Shows how to use the virtual keyboard protocol, optional dependency to libxkbcommon.
+- [wl_virtual_keyboard](examples/wl_virtual_keyboard.py) Shows how to use the virtual keyboard protocol.
 
 ### AsyncIO
 The whole framework is synchronous, so no `async def` nor `await` are to be seen.  

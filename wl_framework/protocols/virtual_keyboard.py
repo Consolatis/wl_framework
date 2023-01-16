@@ -76,7 +76,7 @@ class VirtualKeyboard(Interface):
 			elif self._write_delay:
 				time.sleep(self._write_delay)
 		except Exception as e:
-			print(e)
+			self.log(e)
 
 	@contextmanager
 	def modifier(self, modifier):
