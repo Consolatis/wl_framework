@@ -34,17 +34,34 @@ class WlVirtualKeyboard(WaylandConnection):
 
 if __name__ == '__main__':
 
+	import sys
+	import time
+
+	def usage_and_die():
+		print(
+			"\n\x1b[1mWarning\x1b[m: This example will inject key events.\n" +
+			"It has to be called with a --delay argument like\n\n" +
+			f"\"{sys.argv[0]} --delay 5\"\n\n" +
+			"to provide enough time to switch to a text editor like nano."
+		)
+		exit(0)
+
+	if len(sys.argv) != 3 or sys.argv[1] != '--delay':
+		usage_and_die()
+	try:
+		time.sleep(int(sys.argv[2]))
+	except:
+		usage_and_die()
+
 	from wl_framework.loop_integrations import PollIntegration
 	loop = PollIntegration()
 
 	try:
 		app = WlVirtualKeyboard(eventloop_integration=loop)
+		loop.run()
 	except RuntimeError as e:
 		print(e)
 		exit(1)
-
-	try:
-		loop.run()
 	except KeyboardInterrupt:
 		print()
 	except WaylandDisconnected:
