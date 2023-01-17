@@ -80,6 +80,10 @@ class VirtualKeyboard(Interface):
 
 	@contextmanager
 	def modifier(self, modifier):
+		# We have to ensure a keymap is set before
+		# setting modifiers. This is usually a no-op.
+		self._update_keymap()
+
 		self._modifiers |= modifier
 		self._update_modifiers()
 		yield self
