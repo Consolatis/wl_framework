@@ -1,0 +1,8 @@
+[project]
+name = "wl_framework"
+version = "0.1"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[project.urls]
+repository = "https://github.com/Consolatis/wl_framework.git"
