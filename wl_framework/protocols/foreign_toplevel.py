@@ -27,6 +27,10 @@ class ForeignTopLevel(Interface):
 	def on_finished(self, data, fds):
 		pass
 
+	# Wayland requests
+	def stop(self):
+		self.send_command(0)
+
 	# Custom events
 	def on_toplevel_created(self, toplevel):
 		pass
