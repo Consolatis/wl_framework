@@ -73,6 +73,7 @@ class Display(Interface):
 	# Internal events
 	def on_initial_sync(self):
 		self.seat = Seat(self._connection)
+		self.shm = Shm(self._connection)
 
 	def on_output_new(self, output):
 		self.outputs.append(output)
@@ -265,3 +266,80 @@ class Output(Interface):
 
 	def __repr__(self):
 		return 'f{repr(super())}-{self.global_id}'
+
+class Shm(Interface):
+	def __init__(self, connection):
+		super().__init__(connection)
+		self.set_name('wl_shm')
+		self.set_version(1)
+		self.add_event(self.on_format)
+		self._formats = set()
+		self.bind()
+
+	# Wayland events
+	def on_format(self, data, fds):
+		_, format = ArgUint32.parse(data)
+		#self.log("Got SHM format:", format)
+		self._formats.add(format)
+
+	# Wayland methods
+	def create_pool(self, fd, size):
+		pool = ShmPool(self._connection, self._formats, size)
+		data = ArgUint32.create(pool.obj_id)
+		data += ArgUint32.create(size)
+		self.send_command(0, data, fd)
+		return pool
+
+class ShmPool(Interface):
+	def __init__(self, connection, shm_formats, size):
+		super().__init__(connection)
+		self.set_name('wl_shm_pool')
+		self.set_version(1)
+		self.obj_id = connection.get_new_obj_id()
+		connection.add_event_handler(self)
+		self._shm_formats = shm_formats
+		self._size = size
+
+	# Wayland methods
+	def create_buffer(self, offset, width, height, stride, format):
+		if format not in self._shm_formats:
+			raise ValueError(f"Format {format} not supported by compositor")
+
+		req_size = height * stride
+		if offset + req_size > self._size:
+			raise ValueError(f"Offset {offset} + buffer_size {req_size} > pool size of {self._size}")
+
+		buffer = WlBuffer(self._connection)
+		data = ArgUint32.create(buffer.obj_id)
+		data += ArgInt32.create(offset)
+		data += ArgInt32.create(width)
+		data += ArgInt32.create(height)
+		data += ArgInt32.create(stride)
+		data += ArgUint32.create(format)
+		self.send_command(0, data)
+		return buffer
+
+	def destroy(self):
+		self.send_command(1)
+
+	def resize(self, new_size):
+		data = ArgInt32.create(new_size)
+		self.send_command(1, data)
+
+class WlBuffer(Interface):
+	def __init__(self, connection):
+		super().__init__(connection)
+		self.set_name('wl_buffer')
+		self.set_version(1)
+		self.obj_id = connection.get_new_obj_id()
+		connection.add_event_handler(self)
+		self.add_event(self.on_release)
+
+	# Wayland events
+	def on_release(self, data, fds):
+		#self.log("Buffer released")
+		pass
+
+	# Wayland methods
+	def destroy(self):
+		self.send_command(0)
