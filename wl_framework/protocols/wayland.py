@@ -324,7 +324,7 @@ class ShmPool(Interface):
 
 	def resize(self, new_size):
 		data = ArgInt32.create(new_size)
-		self.send_command(1, data)
+		self.send_command(2, data)
 
 class WlBuffer(Interface):
 	def __init__(self, connection):
