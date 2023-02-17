@@ -16,18 +16,22 @@ from wl_framework.protocols.idle_notify import (
 class ForeignTopLevelMonitor(ForeignTopLevel):
 
 	def on_toplevel_created(self, toplevel):
-		self.log(f"New toplevel created: @{toplevel.obj_id}")
+		self.log(f"Toplevel @{toplevel.obj_id} created")
 
 	def on_toplevel_synced(self, toplevel):
-		self.log(f"Topevel @{toplevel.obj_id} state synced:")
+		self.log(f"Toplevel @{toplevel.obj_id} state synced:")
 		for property in ('app_id', 'title', 'states'):
 			val = getattr(toplevel, property)
 			if property == 'states':
 				val = ', '.join(x.capitalize() for x in val) if val else '-'
 			self.log(f"  {property.capitalize():6s}  {val}")
 
+	def on_toplevel_output_change(self, toplevel):
+		outputs = ', '.join(x.name for x in toplevel.outputs)
+		self.log(f"Toplevel @{toplevel.obj_id} now visible on {outputs}")
+
 	def on_toplevel_closed(self, toplevel):
-		self.log(f"Toplevel closed: {toplevel}")
+		self.log(f"Toplevel @{toplevel.obj_id} closed")
 
 
 class ClipboardMonitor(DataControl):

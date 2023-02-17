@@ -41,6 +41,9 @@ class ForeignTopLevel(Interface):
 	def on_toplevel_closed(self, toplevel):
 		pass
 
+	def on_toplevel_output_change(self, toplevel):
+		pass
+
 	# Internal handlers
 	def _on_toplevel_closed(self, toplevel):
 		del self.windows[toplevel.obj_id]
@@ -62,8 +65,8 @@ class TopLevel(Interface):
 		self._events = (
 			self.on_title,
 			self.on_app_id,
-			self.no_op,               # TODO: output_enter
-			self.no_op,               # TODO: output_leave
+			self.on_output_enter,
+			self.on_output_leave,
 			self.on_state,
 			self.on_done,
 			self.on_closed,
@@ -75,6 +78,7 @@ class TopLevel(Interface):
 		self.app_id = ''
 		self.states = tuple()
 		self.parent = 0
+		self.outputs = set()
 
 	# Wayland events
 	def on_title(self, data, fds):
@@ -84,6 +88,18 @@ class TopLevel(Interface):
 	def on_app_id(self, data, fds):
 		_, data = ArgString.parse(data)
 		self.app_id = data
+
+	def on_output_enter(self, data, fds):
+		_, output_id = ArgUint32.parse(data)
+		output = self._connection.display.get_output_by_id(output_id)
+		self.outputs.add(output)
+		self._parent.on_toplevel_output_change(self)
+
+	def on_output_leave(self, data, fds):
+		_, output_id = ArgUint32.parse(data)
+		output = self._connection.display.get_output_by_id(output_id)
+		self.outputs.remove(output)
+		self._parent.on_toplevel_output_change(self)
 
 	def on_state(self, data, fds):
 		consumed, state_count = ArgUint32.parse(data)
