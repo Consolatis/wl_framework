@@ -36,18 +36,18 @@ class _IdleNotifyManager(Interface):
 	# Wayland requests
 	def destroy(self):
 		# The KDE variant doesn't support destroying the manager
-		if self.name == 'ext_idle_notifier_v1':
+		if self.iface_name == 'ext_idle_notifier_v1':
 			self.send_command(0)
 
 	def get_idle_notifier(self, idle_time_in_seconds, seat):
 		idle_notifier = self._notifier_class(
 			self._connection,
 			idle_time_in_seconds,
-			supports_simulate=self.name != 'ext_idle_notifier_v1'
+			supports_simulate=self.iface_name != 'ext_idle_notifier_v1'
 		)
 
 		data = ArgUint32.create(idle_notifier.obj_id)
-		if self.name == 'ext_idle_notifier_v1':
+		if self.iface_name == 'ext_idle_notifier_v1':
 			data += ArgUint32.create(idle_notifier._idle_time_in_ms)
 			data += ArgUint32.create(seat.obj_id)
 			self.send_command(1, data)

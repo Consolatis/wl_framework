@@ -1,6 +1,7 @@
 # https://gitlab.freedesktop.org/wayland/wayland/-/blob/main/protocol/wayland.xml
 
 import struct
+from collections import defaultdict
 
 from .base import (
 	ArgUint32,
@@ -38,9 +39,9 @@ class Display(Interface):
 		self.obj_id = 1
 		self.set_name('wl_display')
 		self.set_version(1)
-		connection.add_event_handler(self)
 		self.add_event(self.on_error)
 		self.add_event(self.on_delete_id)
+		connection.add_event_handler(self)
 		self.registry = self.get_registry()
 
 	# Wayland events
@@ -71,12 +72,14 @@ class Display(Interface):
 	def on_initial_sync(self):
 		self.seat = Seat(self._connection)
 
+
 class Registry(Interface):
 	def __init__(self, connection, obj_id):
 		super().__init__(connection, obj_id=obj_id)
 		self.set_name('wl_registry')
 		self.set_version(1)
 		self._registry = dict()
+		self._interfaces = defaultdict(list)
 		self._initial_sync = False
 		self.add_event(self.on_global)
 		self.add_event(self.on_global_remove)
@@ -84,29 +87,45 @@ class Registry(Interface):
 	# Wayland events
 	def on_global(self, data, fds):
 		name, version, global_id = ArgRegistryGlobal.parse(data)
-		self._registry[name] = (global_id, version)
+		if global_id in self._registry:
+			self.log(f"Got multiple globals for the same id {global_id}: {name} v{version}")
+			return
+		self._registry[global_id] = (name, version)
+		self._interfaces[name].append(global_id)
 
 	def on_global_remove(self, data, fds):
 		_, global_id = ArgUint32.parse(data)
-		# FIXME: should destroy all object instances for this global_id
 		if global_id not in self._registry:
-			self.log(f"Can't remove global id {global_id}: We have no idea about it")
+			self.log(f"Can't remove global id {global_id}: We don't know anything about it")
 			return
-		del self._registry[global_id]
-		self.log(f"Not destroying instances of global id {global_id}")
+		name, version = self._registry.pop(global_id)
+		self._interfaces[name].remove(global_id)
+		if len(self._interfaces[name]) == 0:
+			del self._interfaces[name]
+
+		# TODO: Should we notify all current instances of this global?
 
 	# Wayland methods
-	def do_bind(self, interface):
-		if not self._initial_sync:
+	def do_bind(self, interface, ignore_sync=False):
+		if not self._initial_sync and not ignore_sync:
 			raise RuntimeError("Bind without waiting for full sync. Please bind in on_initial_sync().")
-		if interface.name not in self._registry:
-			raise UnsupportedProtocolError(f"Interface {interface.name} not supported by server")
-		global_id, version = self._registry[interface.name]
+
+		if interface.iface_name not in self._interfaces:
+			raise UnsupportedProtocolError(f"Interface {interface.iface_name} not supported by server")
+
+		global_id = interface.global_id
+		if global_id is None:
+			global_id = self._interfaces[interface.iface_name][0]
+
+		if global_id not in self._registry:
+			raise ValueError(f"global_id {global_id} specified but not found in registry")
+
+		name, version = self._registry[global_id]
 		version = min(interface.version, version)
 		if version < interface.version:
 			interface.set_version(version)
 		interface.obj_id = self.get_new_obj_id()
-		data = ArgRegistryBind.create(global_id, interface.name, version, interface.obj_id)
+		data = ArgRegistryBind.create(global_id, interface.iface_name, version, interface.obj_id)
 		self.send_command(0, data)
 
 	# Internal events

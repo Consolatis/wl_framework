@@ -44,13 +44,14 @@ class Interface:
 		self._events = list()
 		self._connection = connection
 		self.obj_id = obj_id
-		self.name = None
+		self.iface_name = None
+		self.global_id = None
 
 	def no_op(self, *args, **kwargs):
 		pass
 
 	def set_name(self, name):
-		self.name = name
+		self.iface_name = name
 
 	def set_version(self, version):
 		self.version = version
@@ -78,10 +79,10 @@ class Interface:
 
 	def log(self, *msg):
 		name = f"[{self.__class__.__name__}]"
-		print(f"  {name:^25s}", *msg)
+		print(f" {name:^25s} ", *msg)
 
 	def __repr__(self):
-		return f'<{self.name}-{self.obj_id}>'
+		return f'<{self.iface_name}-{self.obj_id}>'
 
 	def __hash__(self):
 		return self.obj_id
