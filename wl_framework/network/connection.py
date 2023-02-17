@@ -36,9 +36,6 @@ class WaylandConnection:
 		self._incoming_fds = list()
 		self._event_handlers = dict()
 
-		self.display = Display(self)
-		self.display.do_sync(self.on_initial_sync)
-
 		self._read_callbacks = dict()
 		self._write_callbacks = dict()
 		self._timer_callbacks = dict()
@@ -50,6 +47,9 @@ class WaylandConnection:
 			self.add_reader(self.fileno(), self.do_read)
 		except NotImplementedError:
 			pass
+
+		self.display = Display(self)
+		self.display.do_sync(self.on_initial_sync)
 
 	def shutdown(self):
 		try:
@@ -63,9 +63,8 @@ class WaylandConnection:
 		self.display.registry.on_initial_sync()
 		for interface in tuple(self._event_handlers.values()):
 			if isinstance(interface, Interface):
-				if interface == self.display.registry:
-					continue
-				interface.on_initial_sync()
+				if interface != self.display.registry:
+					interface.on_initial_sync()
 
 	def fileno(self):
 		return self._socket.fileno()
@@ -224,7 +223,7 @@ class WaylandConnection:
 		elif callable(callback):
 			callback(data)
 		else:
-			raise RuntimeError(f"_handle_event() got invalid callback: {callback}")
+			raise RuntimeError(f"_handle_event() got invalid callback: {callback} of type {type(callback)}")
 
 	def send_opcode(self, obj_id, opcode, data=b'', fds=None):
 		size = 8 + len(data)
@@ -233,7 +232,9 @@ class WaylandConnection:
 
 		# TODO: wrap in try except and raise WaylandDisconnected()
 		sent = 0
-		if fds:
+		if fds is not None:
+			if isinstance(fds, int):
+				fds = (fds,)
 			sent += self._socket.sendmsg(
 				[data], [
 					(socket.SOL_SOCKET, socket.SCM_RIGHTS, array.array("i", fds))
@@ -245,6 +246,8 @@ class WaylandConnection:
 			sent += self._socket.sendmsg([data[sent:]])
 
 	def log(self, *msg):
-		name = f"[{self.__class__.__name__}]"
-		print(f"  {name:^25s}", *msg)
+		name = f"[{repr(self)}]"
+		print(f" {name:^25s} ", *msg)
 
+	def __repr__(self):
+		return self.__class__.__name__
