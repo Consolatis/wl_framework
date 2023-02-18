@@ -80,11 +80,11 @@ class Display(Interface):
 
 	def on_output_del(self, output_global):
 		for output in tuple(self.outputs):
-			if output.global_id == output_id:
+			if output.global_id == output_global:
 				self.outputs.remove(output)
-				self.log(f"Output {output_id} removed, {len(self.outputs)} outputs remaining")
+				self.log(f"Output {output_global} removed, {len(self.outputs)} outputs remaining")
 				return
-		self.log(f"We can't remove output {output_id} because we don't know anything about it")
+		self.log(f"We can't remove output {output_global} because we don't know anything about it")
 
 	def get_output_by_id(self, output_id):
 		for output in self.outputs:
