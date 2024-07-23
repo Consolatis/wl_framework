@@ -265,7 +265,7 @@ class Output(Interface):
 		#self.log("Got description:", description)
 
 	def __repr__(self):
-		return 'f{repr(super())}-{self.global_id}'
+		return f'{self.__class__.__name__}-{self.global_id}'
 
 class Shm(Interface):
 	def __init__(self, connection):

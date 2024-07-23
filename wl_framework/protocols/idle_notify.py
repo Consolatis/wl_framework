@@ -8,11 +8,13 @@ from .base import (
 )
 
 def IdleNotifyManager(*args, **kwargs):
-	for protocol_name in ('ext_idle_notifier_v1', 'org_kde_kwin_idle'):
+	for protocol_name in ('org_kde_kwin_idle', 'ext_idle_notifier_v1'):
 		try:
-			return _IdleNotifyManager(protocol_name, *args, **kwargs)
+			impl = _IdleNotifyManager(protocol_name, *args, **kwargs)
+			print("Using protocol ", protocol_name)
+			return impl
 		except UnsupportedProtocolError as e:
-			pass
+			print(e)
 
 	raise UnsupportedProtocolError(
 		"Neither org_kde_kwin_idle nor " +
