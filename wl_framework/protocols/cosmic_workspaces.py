@@ -32,11 +32,9 @@ class CosmicWorkspaceManager(Interface):
 		self.on_group(group)
 
 	def _on_done(self, data, fds):
-		self.log("on_done")
 		self.on_sync()
 
 	def _on_finished(self, data, fds):
-		self.log("finished")
 		self.on_finished()
 
 	# Wayland requests
@@ -91,19 +89,19 @@ class CosmicWorkspaceGroup(Interface):
 	def on_capabilities(self, data, fds):
 		_, data = ArgArray.parse(data)
 		self.capabilities = tuple(self._parse_capabilities(data))
-		self.log(f"group capabilities: {', '.join(self.capabilities)}")
+		#self.log(f"group capabilities: {', '.join(self.capabilities)}")
 
 	def on_output_enter(self, data, fds):
 		_, output_id = ArgUint32.parse(data)
 		output = self._connection.display.get_output_by_id(output_id)
 		self.outputs.add(output)
-		self.log(f"output enter for {output.name}")
+		#self.log(f"output enter for {output.name}")
 
 	def on_output_leave(self, data, fds):
 		_, output_id = ArgUint32.parse(data)
 		output = self._connection.display.get_output_by_id(output_id)
 		self.outputs.remove(output)
-		self.log(f"output leave for {output.name}")
+		#self.log(f"output leave for {output.name}")
 
 	def on_workspace(self, data, fds):
 		_, obj_id = ArgUint32.parse(data)
@@ -112,17 +110,18 @@ class CosmicWorkspaceGroup(Interface):
 		self._parent.on_workspace(workspace)
 
 	def on_remove(self, data, fds):
-		self.log("group removed")
+		#self.log("group removed")
+		pass
 
 	# Wayland requests
 	def create_workspace(self, workspace_name):
 		# FIXME: check against capabilities
 		arg = ArgString.create(workspace_name)
 		self.send_command(0, arg)
-		self.log(f"should create new workspace: {workspace_name}")
+		#self.log(f"should create new workspace: {workspace_name}")
 
 	def destroy(self):
-		self.log("Destroying")
+		#self.log("Destroying")
 		self.send_command(1)
 
 	# Internal helpers
@@ -179,48 +178,49 @@ class CosmicWorkspaceHandle(Interface):
 	# Wayland events
 	def on_name(self, data, fds):
 		_, name = ArgString.parse(data)
-		self.log(f"workspace name: {name}")
+		#self.log(f"workspace name: {name}")
 		self.name = name
 
 	def on_coordinates(self, data, fds):
 		# FIXME: some array
-		self.log(f"workspace coordinates")
+		#self.log(f"workspace coordinates")
+		pass
 
 	def on_state(self, data, fds):
 		_, data = ArgArray.parse(data)
 		self.states = tuple(self._parse_array(self.STATES, data))
-		self.log("workspace state: " + ', '.join(self.states))
+		#self.log("workspace state: " + ', '.join(self.states))
 
 	def on_capabilities(self, data, fs):
 		_, data = ArgArray.parse(data)
 		self.capabilities = tuple(self._parse_array(self.CAPS, data))
-		self.log("workspace capabilities: " + ', '.join(self.capabilities))
+		#self.log("workspace capabilities: " + ', '.join(self.capabilities))
 
 	def on_remove(self, data, fds):
-		self.log("workspace removed")
+		#self.log("workspace removed")
 		self._parent._on_workspace_removed(self)
 		self.destroy()
 
 	# Wayland requests
 	def destroy(self):
-		self.log("Destroying")
+		#self.log("Destroying")
 		self._connection.remove_event_handler(self)
 		self.send_command(0)
 
 	def activate(self):
 		# FIXME: check against capabilities
 		self.send_command(1)
-		self.log("activating workspace")
+		#self.log("activating workspace")
 
 	def deactivate(self):
 		# FIXME: check against capabilities
 		self.send_command(2)
-		self.log("deactivating workspace")
+		#self.log("deactivating workspace")
 
 	def remove(self):
 		# FIXME: check against capabilities
 		self.send_command(3)
-		self.log("removing workspace")
+		#self.log("removing workspace")
 
 	# Internal helpers
 	def _parse_array(self, states, array):
